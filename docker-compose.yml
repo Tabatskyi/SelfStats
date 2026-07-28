@@ -22,8 +22,8 @@ services:
 
   awesome-stats:
     build:
-      context: ./src/submodules/awesome-github-stats/src
-      dockerfile: AwesomeGithubStats.Api/Dockerfile
+      context: .
+      dockerfile: docker/awesome-stats.Dockerfile
     container_name: selfstats-awesome
     environment:
       - ASPNETCORE_HTTP_PORTS=8080
