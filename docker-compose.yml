@@ -28,9 +28,6 @@ services:
     environment:
       - ASPNETCORE_HTTP_PORTS=8080
       - PATS__0=${GITHUB_TOKEN:-}
-      - PAT_1=${GITHUB_TOKEN:-}
-      - TOKEN=${GITHUB_TOKEN:-}
-      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
     restart: unless-stopped
 
   streak-stats:
@@ -40,8 +37,6 @@ services:
     container_name: selfstats-streak
     environment:
       - TOKEN=${GITHUB_TOKEN:-}
-      - PAT_1=${GITHUB_TOKEN:-}
-      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
     restart: unless-stopped
 
   readme-stats:
@@ -51,8 +46,6 @@ services:
     container_name: selfstats-readme
     environment:
       - PAT_1=${GITHUB_TOKEN:-}
-      - TOKEN=${GITHUB_TOKEN:-}
-      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
     restart: unless-stopped
 
   trophy-stats:
@@ -63,6 +56,4 @@ services:
     environment:
       - GITHUB_TOKEN1=${GITHUB_TOKEN:-}
       - GITHUB_TOKEN2=${GITHUB_TOKEN:-}
-      - TOKEN=${GITHUB_TOKEN:-}
-      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
     restart: unless-stopped
