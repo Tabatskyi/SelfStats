@@ -25,20 +25,50 @@ const TARGETS = {
 };
 
 /**
+ * Extracts username from either query parameters or path segments.
+ * Supports:
+ *  - ?username=name / ?user=name
+ *  - /awesome/user-stats/name
+ *  - /awesome/name
+ *  - /trophy/name
+ *  - /streak/name
+ *  - /top-language/name
+ */
+function extractUsername(req) {
+  let username = (req.query.username || req.query.user || "").toString().trim();
+  if (username) return username;
+
+  const rawPath = req.originalUrl ? req.originalUrl.split("?")[0] : (req.path || "");
+
+  // Pattern: /awesome/user-stats/:username/...
+  const awesomeUserStatsMatch = rawPath.match(/^\/awesome\/user-stats\/([^/?#]+)/i);
+  if (awesomeUserStatsMatch) {
+    return awesomeUserStatsMatch[1];
+  }
+
+  // Pattern: /<route>/:username/...
+  const generalMatch = rawPath.match(/^\/(?:awesome|trophy|streak|top-language)\/([^/?#]+)/i);
+  if (generalMatch) {
+    const candidate = generalMatch[1];
+    if (candidate !== "user-stats" && candidate !== "health") {
+      return candidate;
+    }
+  }
+
+  return "";
+}
+
+/**
  * Access Control Middleware
  * Checks if target username is permitted.
  */
 function enforceUsernameWhitelist(req, res, next) {
-  // Allow system/info endpoints
-  if (req.path === "/" || req.path === "/health") {
+  const rawPath = req.originalUrl ? req.originalUrl.split("?")[0] : req.path;
+  if (rawPath === "/" || rawPath === "/health") {
     return next();
   }
 
-  const username = (
-    req.query.username ||
-    req.query.user ||
-    ""
-  ).toString().trim();
+  const username = extractUsername(req);
 
   if (isAccessRestricted) {
     if (!username || !allowedUsersSet.has(username.toLowerCase())) {
@@ -71,23 +101,26 @@ app.get("/", (req, res) => {
   res.json({
     name: "SelfStats Gateway",
     endpoints: {
-      trophy: "/trophy?username=<github_user>",
-      streak: "/streak?user=<github_user>",
-      topLanguage: "/top-language?username=<github_user>",
-      awesome: "/awesome?username=<github_user>",
+      trophy: ["/trophy?username=<github_user>", "/trophy/<github_user>"],
+      streak: ["/streak?user=<github_user>", "/streak/<github_user>"],
+      topLanguage: ["/top-language?username=<github_user>", "/top-language/<github_user>"],
+      awesome: [
+        "/awesome/user-stats/<github_user>",
+        "/awesome?username=<github_user>",
+        "/awesome/<github_user>",
+      ],
     },
     allowedUsersConfigured: isAccessRestricted,
   });
 });
 
 /**
- * Helper to build proxy rewrite path
+ * Helper to build proxy rewrite path for generic routes
  */
 function buildRewrittenPath(req, targetParamName, basePath = "/") {
-  const username = (req.query.username || req.query.user || "").toString();
+  const username = extractUsername(req);
   const url = new URL(req.url, "http://localhost");
 
-  // Remove generic user params
   url.searchParams.delete("username");
   url.searchParams.delete("user");
 
@@ -100,7 +133,14 @@ function buildRewrittenPath(req, targetParamName, basePath = "/") {
 }
 
 /**
- * Route 1: /awesome -> awesome-github-stats (/user-stats/{username})
+ * Route 1: /awesome -> awesome-github-stats
+ * Supports:
+ *   - /awesome/user-stats/tabatskyi
+ *   - /awesome/user-stats/tabatskyi/preview
+ *   - /awesome/user-stats/tabatskyi/stats
+ *   - /awesome/user-stats/tabatskyi/rank
+ *   - /awesome/tabatskyi
+ *   - /awesome?username=tabatskyi
  */
 app.use(
   "/awesome",
@@ -108,12 +148,37 @@ app.use(
     target: TARGETS.awesome,
     changeOrigin: true,
     pathRewrite: (path, req) => {
-      const username = (req.query.username || req.query.user || "").toString();
       const url = new URL(req.url, "http://localhost");
-      url.searchParams.delete("username");
-      url.searchParams.delete("user");
-      const queryStr = url.searchParams.toString();
-      return `/user-stats/${encodeURIComponent(username)}${queryStr ? "?" + queryStr : ""}`;
+      const originalPath = req.originalUrl ? req.originalUrl.split("?")[0] : path;
+
+      // 1. Match /awesome/user-stats/:username (or subpaths like /preview)
+      const userStatsMatch = originalPath.match(/^\/awesome\/user-stats\/(.+)$/i);
+      if (userStatsMatch) {
+        url.searchParams.delete("username");
+        url.searchParams.delete("user");
+        const queryStr = url.searchParams.toString();
+        return `/user-stats/${userStatsMatch[1]}${queryStr ? "?" + queryStr : ""}`;
+      }
+
+      // 2. Match /awesome?username=...
+      const usernameQuery = (req.query.username || req.query.user || "").toString();
+      if (usernameQuery) {
+        url.searchParams.delete("username");
+        url.searchParams.delete("user");
+        const queryStr = url.searchParams.toString();
+        return `/user-stats/${encodeURIComponent(usernameQuery)}${queryStr ? "?" + queryStr : ""}`;
+      }
+
+      // 3. Match /awesome/:username
+      const simpleMatch = originalPath.match(/^\/awesome\/([^/?#]+)(.*)$/i);
+      if (simpleMatch && simpleMatch[1] !== "user-stats") {
+        url.searchParams.delete("username");
+        url.searchParams.delete("user");
+        const queryStr = url.searchParams.toString();
+        return `/user-stats/${encodeURIComponent(simpleMatch[1])}${simpleMatch[2]}${queryStr ? "?" + queryStr : ""}`;
+      }
+
+      return path;
     },
   })
 );

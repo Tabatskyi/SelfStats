@@ -10,10 +10,10 @@ Keep your cards independent, up to date with upstream submodules, and enforce ac
 
 | Route | Card Service | Upstream Repository | Example Usage |
 | --- | --- | --- | --- |
-| `/trophy` | GitHub Profile Trophy | [ryo-ma/github-profile-trophy](https://github.com/ryo-ma/github-profile-trophy) | `![Trophy](http://your-host:8080/trophy?username=yourname)` |
-| `/streak` | GitHub Readme Streak Stats | [DenverCoder1/github-readme-streak-stats](https://github.com/DenverCoder1/github-readme-streak-stats) | `![Streak](http://your-host:8080/streak?user=yourname)` |
-| `/top-language` | GitHub Readme Stats (Top Languages) | [anuraghazra/github-readme-stats](https://github.com/anuraghazra/github-readme-stats) | `![Top Langs](http://your-host:8080/top-language?username=yourname)` |
-| `/awesome` | Awesome GitHub Stats | [brunobritodev/awesome-github-stats](https://github.com/brunobritodev/awesome-github-stats) | `![Awesome Stats](http://your-host:8080/awesome?username=yourname)` |
+| `/trophy` | GitHub Profile Trophy | [ryo-ma/github-profile-trophy](https://github.com/ryo-ma/github-profile-trophy) | `![Trophy](http://your-host:8080/trophy/yourname)` |
+| `/streak` | GitHub Readme Streak Stats | [DenverCoder1/github-readme-streak-stats](https://github.com/DenverCoder1/github-readme-streak-stats) | `![Streak](http://your-host:8080/streak/yourname)` |
+| `/top-language` | GitHub Readme Stats (Top Languages) | [anuraghazra/github-readme-stats](https://github.com/anuraghazra/github-readme-stats) | `![Top Langs](http://your-host:8080/top-language/yourname)` |
+| `/awesome` | Awesome GitHub Stats | [brunobritodev/awesome-github-stats](https://github.com/brunobritodev/awesome-github-stats) | `![Awesome Stats](http://your-host:8080/awesome/user-stats/yourname)` |
 
 ---
 
