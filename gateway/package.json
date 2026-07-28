@@ -1,0 +1,14 @@
+{
+  "name": "self-stats-gateway",
+  "version": "1.0.0",
+  "description": "Gateway router and access control for self-hosted GitHub stats cards",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "http-proxy-middleware": "^3.0.0"
+  }
+}

@@ -1,0 +1,68 @@
+services:
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    container_name: selfstats-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - ALLOWED_USERNAMES=${ALLOWED_USERNAMES:-}
+      - PORT=8080
+      - AWESOME_STATS_URL=http://awesome-stats:8080
+      - STREAK_STATS_URL=http://streak-stats:80
+      - README_STATS_URL=http://readme-stats:9000
+      - TROPHY_STATS_URL=http://trophy-stats:8080
+    depends_on:
+      - awesome-stats
+      - streak-stats
+      - readme-stats
+      - trophy-stats
+    restart: unless-stopped
+
+  awesome-stats:
+    build:
+      context: ./src/submodules/awesome-github-stats/src
+      dockerfile: AwesomeGithubStats.Api/Dockerfile
+    container_name: selfstats-awesome
+    environment:
+      - ASPNETCORE_HTTP_PORTS=8080
+      - PATS__0=${GITHUB_TOKEN:-}
+      - PAT_1=${GITHUB_TOKEN:-}
+      - TOKEN=${GITHUB_TOKEN:-}
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+    restart: unless-stopped
+
+  streak-stats:
+    build:
+      context: ./src/submodules/github-readme-streak-stats
+      dockerfile: Dockerfile
+    container_name: selfstats-streak
+    environment:
+      - TOKEN=${GITHUB_TOKEN:-}
+      - PAT_1=${GITHUB_TOKEN:-}
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+    restart: unless-stopped
+
+  readme-stats:
+    build:
+      context: ./src/submodules/github-readme-stats
+      dockerfile: ../../../docker/readme-stats.Dockerfile
+    container_name: selfstats-readme
+    environment:
+      - PAT_1=${GITHUB_TOKEN:-}
+      - TOKEN=${GITHUB_TOKEN:-}
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+    restart: unless-stopped
+
+  trophy-stats:
+    build:
+      context: ./src/submodules/github-profile-trophy
+      dockerfile: Dockerfile
+    container_name: selfstats-trophy
+    environment:
+      - GITHUB_TOKEN1=${GITHUB_TOKEN:-}
+      - GITHUB_TOKEN2=${GITHUB_TOKEN:-}
+      - TOKEN=${GITHUB_TOKEN:-}
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+    restart: unless-stopped
