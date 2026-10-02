@@ -6,7 +6,7 @@
 	url = https://github.com/DenverCoder1/github-readme-streak-stats
 [submodule "src/submodules/github-readme-stats"]
 	path = src/submodules/github-readme-stats
-	url = https://github.com/anuraghazra/github-readme-stats
+	url = https://github.com/stats-organization/github-stats-extended
 [submodule "src/submodules/github-profile-trophy"]
 	path = src/submodules/github-profile-trophy
 	url = https://github.com/ryo-ma/github-profile-trophy
